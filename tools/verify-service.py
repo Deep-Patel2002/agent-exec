@@ -120,6 +120,7 @@ def main():
     scenarios = [
         ("legitimate_execution", "print(sum(range(100)))", "succeeded", 3000),
         ("network_denial", "import socket; socket.socket()", "failed", 3000),
+        ("kernel_log_denial", "import os,ctypes,errno\nassert not os.path.exists('/dev/kmsg')\nlibc=ctypes.CDLL(None,use_errno=True)\nassert libc.klogctl(3,None,0)==-1 and ctypes.get_errno()==errno.EPERM\ntry:\n open('/proc/kmsg','rb')\n raise AssertionError('kernel log readable')\nexcept OSError as e:\n assert e.errno in (errno.EPERM,errno.EACCES)\nprint('kernel logs denied')", "succeeded", 3000),
         ("output_limit", "import os; os.write(1,b'x'*200000)", "output_limit", 3000),
         ("deadline", "import time; time.sleep(10)", "timed_out", 150),
         ("memory_limit", "a=bytearray(512*1024*1024)", "resource_exhausted", 3000),

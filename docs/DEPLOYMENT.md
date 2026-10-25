@@ -70,6 +70,13 @@ The server self-tests the real backend before listening. It refuses root
 execution, missing controllers, invalid image/filter paths, and an unsandboxed
 fallback. Root is used only by setup to install artifacts and delegate resources.
 
+The unit denies the kernel `syslog` syscall directly instead of enabling
+`ProtectKernelLogs`, whose `/proc/kmsg` overmount can prevent bubblewrap from
+mounting the guest procfs on newer kernels. The service runs without capabilities,
+uses private devices, and the guest seccomp policy also denies `syslog`.
+The installed-service verification checks that kernel logs cannot be read through
+the syscall or `/proc/kmsg`, and that `/dev/kmsg` is absent from the guest.
+
 ## Verify the installed service
 
 ```sh
