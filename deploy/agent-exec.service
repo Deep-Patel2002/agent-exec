@@ -1,0 +1,44 @@
+[Unit]
+Description=Agent execution service with Linux-enforced containment
+After=local-fs.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=agentexec
+Group=agentexec
+ExecStart=/opt/agent-exec/bin/agent-exec-server -config /etc/agent-exec/config.json
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=15
+KillMode=control-group
+Delegate=cpu memory pids
+StateDirectory=agent-exec
+StateDirectoryMode=0700
+WorkingDirectory=/var/lib/agent-exec
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=no
+RestrictSUIDSGID=yes
+# Bubblewrap uses netlink to configure the private loopback interface before
+# applying the stricter guest seccomp filter (which denies all socket creation).
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+LockPersonality=yes
+TasksMax=512
+MemoryMax=1G
+CPUQuota=200%
+LimitNOFILE=4096
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

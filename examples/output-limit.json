@@ -1,0 +1,4 @@
+{
+  "argv": ["/usr/bin/python3", "-I", "-c", "import os; os.write(1, b'x' * 200000)"],
+  "timeout_ms": 2000
+}

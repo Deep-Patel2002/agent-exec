@@ -1,0 +1,92 @@
+{
+  "checks": [
+    {
+      "name": "authentication",
+      "passed": true
+    },
+    {
+      "name": "readiness",
+      "passed": true
+    },
+    {
+      "name": "traversal_rejected",
+      "passed": true
+    },
+    {
+      "name": "unknown_fields_rejected",
+      "passed": true
+    },
+    {
+      "name": "duplicate_fields_rejected",
+      "passed": true
+    },
+    {
+      "name": "legitimate_execution",
+      "passed": true,
+      "state": "succeeded",
+      "usage": {
+        "wall_ms": 14,
+        "cpu_usec": 15256,
+        "oom_kills": 0,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "network_denial",
+      "passed": true,
+      "state": "failed",
+      "usage": {
+        "wall_ms": 25,
+        "cpu_usec": 24795,
+        "oom_kills": 0,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "output_limit",
+      "passed": true,
+      "state": "output_limit",
+      "usage": {
+        "wall_ms": 109,
+        "cpu_usec": 19059,
+        "oom_kills": 0,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "deadline",
+      "passed": true,
+      "state": "timed_out",
+      "usage": {
+        "wall_ms": 151,
+        "cpu_usec": 14123,
+        "oom_kills": 0,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "memory_limit",
+      "passed": true,
+      "state": "resource_exhausted",
+      "usage": {
+        "wall_ms": 123,
+        "cpu_usec": 126917,
+        "oom_kills": 4,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "running_cancellation",
+      "passed": true
+    },
+    {
+      "name": "metadata_only_listing",
+      "passed": true
+    }
+  ],
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "benchmark": null
+}

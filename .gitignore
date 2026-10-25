@@ -1,0 +1,11 @@
+/bin/
+/dist/
+/.local/
+/.tools/
+*.token
+tokens.json
+coverage.out
+*.test
+*.exe
+__pycache__/
+*.pyc

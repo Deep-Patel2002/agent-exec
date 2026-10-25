@@ -1,0 +1,204 @@
+{
+  "checks": [
+    {
+      "name": "authentication",
+      "passed": true
+    },
+    {
+      "name": "readiness",
+      "passed": true
+    },
+    {
+      "name": "traversal_rejected",
+      "passed": true
+    },
+    {
+      "name": "unknown_fields_rejected",
+      "passed": true
+    },
+    {
+      "name": "duplicate_fields_rejected",
+      "passed": true
+    },
+    {
+      "name": "legitimate_execution",
+      "passed": true,
+      "state": "succeeded",
+      "usage": {
+        "wall_ms": 15,
+        "cpu_usec": 15771,
+        "oom_kills": 0,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "network_denial",
+      "passed": true,
+      "state": "failed",
+      "usage": {
+        "wall_ms": 23,
+        "cpu_usec": 24779,
+        "oom_kills": 0,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "output_limit",
+      "passed": true,
+      "state": "output_limit",
+      "usage": {
+        "wall_ms": 13,
+        "cpu_usec": 14168,
+        "oom_kills": 0,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "deadline",
+      "passed": true,
+      "state": "timed_out",
+      "usage": {
+        "wall_ms": 151,
+        "cpu_usec": 15243,
+        "oom_kills": 0,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "memory_limit",
+      "passed": true,
+      "state": "resource_exhausted",
+      "usage": {
+        "wall_ms": 136,
+        "cpu_usec": 139957,
+        "oom_kills": 4,
+        "pids_limit_hits": 0
+      }
+    },
+    {
+      "name": "running_cancellation",
+      "passed": true
+    },
+    {
+      "name": "metadata_only_listing",
+      "passed": true
+    }
+  ],
+  "environment": {
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "benchmark": {
+    "n": 30,
+    "workload": "print(sum(range(100)))",
+    "sandbox_execution": {
+      "p50_ms": 14.0,
+      "p95_ms": 18,
+      "samples": [
+        15,
+        15,
+        15,
+        15,
+        15,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        15,
+        15,
+        18,
+        14,
+        16,
+        16,
+        14,
+        14,
+        91,
+        14,
+        14,
+        14,
+        14,
+        14,
+        14,
+        15,
+        14
+      ]
+    },
+    "http_end_to_end": {
+      "p50_ms": 51.344,
+      "p95_ms": 78.412,
+      "samples": [
+        58.00599899998815,
+        45.93229899990092,
+        47.468198999922606,
+        45.51709899999423,
+        45.91159899996455,
+        45.42639900000722,
+        45.77399899994816,
+        47.3254989999532,
+        45.82229899995127,
+        44.64949999999135,
+        45.283498999992844,
+        46.660499000040545,
+        45.19539900002201,
+        47.68509899997753,
+        51.18629899993721,
+        78.41229799998928,
+        49.39169900001161,
+        59.982498999943346,
+        67.97739900002853,
+        51.50079899999582,
+        62.35029799995573,
+        145.62739699999838,
+        56.193899000049896,
+        65.63749800000096,
+        60.68579899999804,
+        56.641298999920764,
+        59.81209900005524,
+        56.14659900004426,
+        54.50579899991226,
+        58.07929900004183
+      ]
+    },
+    "trusted_host_baseline": {
+      "p50_ms": 9.931,
+      "p95_ms": 11.173,
+      "samples": [
+        10.667699000009634,
+        11.204300000031253,
+        9.90090000004784,
+        10.0416000000223,
+        10.088199999927383,
+        9.942700000010518,
+        10.042300000009163,
+        9.820099999956255,
+        10.199699000054352,
+        10.036898999942423,
+        9.770899999921312,
+        9.928299999955925,
+        10.6485999999677,
+        9.906399999977111,
+        9.911199999919518,
+        10.016600000085418,
+        10.041000000001077,
+        9.820698999988053,
+        9.915500000033717,
+        10.388199999965764,
+        9.85620000005838,
+        9.92580000001908,
+        9.831500000018423,
+        9.861399999977039,
+        11.17260000000897,
+        9.873799000047256,
+        9.626999999909458,
+        9.977600000070197,
+        9.933399000033205,
+        9.682099999963611
+      ]
+    },
+    "notes": "Sequential warm-cache workload; includes no network/model calls. Not a capacity or production SLO claim."
+  }
+}

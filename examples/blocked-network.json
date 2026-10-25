@@ -1,0 +1,4 @@
+{
+  "argv": ["/usr/bin/python3", "-I", "-c", "import socket; socket.socket().connect(('1.1.1.1', 443))"],
+  "timeout_ms": 1000
+}

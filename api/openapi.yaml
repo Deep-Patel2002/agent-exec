@@ -1,0 +1,140 @@
+openapi: 3.1.0
+info:
+  title: Agent Exec
+  version: 0.1.0
+  description: Authenticated local execution on a dedicated Linux host. No host mounts, caller environment, or networking options.
+servers:
+  - url: http://127.0.0.1:8080
+security:
+  - bearerAuth: []
+paths:
+  /livez:
+    get:
+      security: []
+      responses:
+        '200': {description: Process is alive; not an isolation/readiness guarantee}
+  /readyz:
+    get:
+      responses:
+        '200': {description: Service accepts work}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '503': {description: Service closed or quarantined}
+  /metrics:
+    get:
+      responses:
+        '200':
+          description: Prometheus text metrics; counters reset on restart
+          content:
+            text/plain:
+              schema: {type: string}
+  /v1/jobs:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Request'}
+      responses:
+        '202':
+          description: Durably admitted. The request connection does not own the job lifetime.
+          headers:
+            Location:
+              schema: {type: string}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Job'}
+        '400': {description: 'Invalid policy request, ambiguous or unknown JSON fields'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '413': {description: HTTP body exceeds 1 MiB}
+        '415': {description: application/json required}
+        '429': {description: Execution capacity exhausted; Retry-After is 1 second}
+        '503': {description: Not accepting work}
+    get:
+      responses:
+        '200':
+          description: Latest 100 retained jobs belonging to the caller; result/output omitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    type: array
+                    maxItems: 100
+                    items: {$ref: '#/components/schemas/Job'}
+  /v1/jobs/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: {type: string, pattern: '^[a-f0-9]{32}$'}
+    get:
+      responses:
+        '200':
+          description: Caller-owned job and bounded result
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Job'}
+        '404': {description: Unknown or foreign job}
+    delete:
+      responses:
+        '202': {description: Cancellation requested; poll GET for terminal state. Already terminal jobs are unchanged.}
+        '404': {description: Unknown or foreign job}
+        '503': {description: Cancellation could not be durably audited}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer}
+  responses:
+    Unauthorized:
+      description: Missing/invalid credential or browser Origin request
+  schemas:
+    Request:
+      type: object
+      additionalProperties: false
+      required: [argv]
+      properties:
+        argv:
+          type: array
+          minItems: 1
+          maxItems: 64
+          items: {type: string}
+          description: First item must be a server-approved absolute sandbox executable; total argument bytes <=32768; no NULs.
+        files:
+          type: object
+          additionalProperties: {type: string}
+          description: UTF-8 input contents keyed by clean relative ASCII paths; no archives, symlinks, or host paths. Server bounds file count and bytes.
+        timeout_ms:
+          type: integer
+          minimum: 0
+          maximum: 300000
+          description: Omitted/zero uses operator default; nonzero minimum 100 and cannot exceed operator maximum.
+    State:
+      type: string
+      enum: [queued, running, succeeded, failed, timed_out, cancelled, output_limit, resource_exhausted, interrupted]
+    Job:
+      type: object
+      required: [id, principal, state, created_at]
+      properties:
+        id: {type: string}
+        principal: {type: string}
+        state: {$ref: '#/components/schemas/State'}
+        created_at: {type: string, format: date-time}
+        started_at: {type: string, format: date-time}
+        finished_at: {type: string, format: date-time}
+        result:
+          type: object
+          properties:
+            state: {$ref: '#/components/schemas/State'}
+            exit_code: {type: integer, description: '-1 for no normal process exit'}
+            stdout: {type: string}
+            stderr: {type: string}
+            output_truncated: {type: boolean}
+            error: {type: string}
+            usage:
+              type: object
+              properties:
+                wall_ms: {type: integer}
+                cpu_usec: {type: integer}
+                memory_peak_bytes: {type: integer, description: Omitted when unsupported by kernel}
+                oom_kills: {type: integer}
+                pids_limit_hits: {type: integer}

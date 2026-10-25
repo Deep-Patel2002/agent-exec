@@ -1,0 +1,23 @@
+{
+  "listen": "127.0.0.1:8080",
+  "state_dir": "/var/lib/agent-exec",
+  "rootfs": "/opt/agent-exec/rootfs",
+  "cgroup_root": "auto",
+  "bwrap_path": "/usr/bin/bwrap",
+  "seccomp_path": "/opt/agent-exec/default.bpf",
+  "tokens_file": "/etc/agent-exec/tokens.json",
+  "workers": 2,
+  "max_in_flight": 8,
+  "retained_jobs": 128,
+  "policy": {
+    "allowed_executables": ["/usr/bin/python3", "/bin/sh"],
+    "default_timeout_ms": 10000,
+    "max_timeout_ms": 30000,
+    "memory_bytes": 268435456,
+    "pids_max": 64,
+    "cpu_millis": 1000,
+    "output_bytes": 65536,
+    "max_input_bytes": 262144,
+    "max_files": 32
+  }
+}

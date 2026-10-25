@@ -1,0 +1,58 @@
+name: verify
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  control-plane:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.27.3'
+          cache: false
+      - run: go test -count=1 ./...
+      - run: go vet ./...
+      - if: runner.os == 'Linux'
+        run: go test -race -count=1 ./...
+  linux-isolation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.27.3'
+          cache: false
+      - name: Build trusted runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y bubblewrap libseccomp-dev gcc python3
+          make build seccomp fmt-check
+          sudo install -d -m 0755 /opt/agent-exec
+          sudo bash tools/build-rootfs.sh /opt/agent-exec/rootfs
+          sudo install -m 0444 bin/default.bpf /opt/agent-exec/default.bpf
+          sudo useradd -m -s /bin/bash agentexec-ci
+          sudo install -d -m 0700 -o agentexec-ci -g agentexec-ci /var/lib/agent-exec-test
+          # GitHub checkout ancestors can be private to runner; grant traversal
+          # to this ephemeral test account without making files writable.
+          sudo chmod o+x "$HOME" "$(dirname "$GITHUB_WORKSPACE")" "$GITHUB_WORKSPACE"
+      - name: Verify kernel boundaries as an unprivileged account
+        run: |
+          sudo systemd-run --unit=agentexec-ci --wait --pipe --collect \
+            --uid=agentexec-ci --property=Delegate=yes \
+            --working-directory="$GITHUB_WORKSPACE" \
+            /usr/bin/env PATH="$PATH" bash tools/run-integration.sh
+      - name: Verify installed systemd service and crash recovery
+        run: |
+          sudo bash tools/install-local.sh
+          sudo systemctl start agent-exec.service
+          sudo python3 tools/verify-service.py --token-file /var/lib/agent-exec/auth/client.token
+          sudo python3 tools/verify-service.py --token-file /var/lib/agent-exec/auth/client.token --restart-phase before
+          sudo systemctl kill --signal=KILL --kill-whom=main agent-exec.service
+          sudo python3 tools/verify-service.py --token-file /var/lib/agent-exec/auth/client.token --restart-phase after

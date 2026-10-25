@@ -1,0 +1,5 @@
+{
+  "argv": ["/usr/bin/python3", "-I", "/input/main.py"],
+  "files": {"main.py": "import json, os\nprint(json.dumps({'message': 'hello from the sandbox', 'cwd': os.getcwd()}))\n"},
+  "timeout_ms": 2000
+}
