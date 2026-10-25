@@ -30,6 +30,7 @@ ProtectKernelModules=yes
 # mount on newer kernels. Deny syslog directly; the service has no capabilities,
 # and PrivateDevices plus the guest's private /dev exclude /dev/kmsg.
 SystemCallFilter=~syslog
+SystemCallErrorNumber=EPERM
 ProtectControlGroups=no
 RestrictSUIDSGID=yes
 # Bubblewrap uses netlink to configure the private loopback interface before
