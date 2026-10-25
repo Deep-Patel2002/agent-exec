@@ -48,6 +48,8 @@ go test -race ./...
 Execution requires Linux, unified cgroup v2, a delegated systemd unit, non-setuid
 bubblewrap 0.9+, and a dedicated unprivileged account. Windows and macOS can
 build the client and run control-plane tests; they cannot run the Linux backend.
+On Ubuntu, review the [AppArmor namespace policy setup](docs/DEPLOYMENT.md#ubuntu-apparmor-namespace-policy)
+before starting the service.
 
 On a dedicated Ubuntu 24.04+ VM with the required kernel support:
 

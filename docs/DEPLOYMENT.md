@@ -16,6 +16,31 @@ Do not globally disable host security modules to make a probe pass. If a host
 policy prohibits required namespaces, use an appropriately configured dedicated
 VM or an administrator-reviewed policy exception for this service.
 
+### Ubuntu AppArmor namespace policy
+
+Ubuntu 24.04 can enable `kernel.apparmor_restrict_unprivileged_userns=1`.
+Without an appropriate bubblewrap profile, setup can fail with
+`bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted`, before the
+workload starts. Review Ubuntu's packaged `bwrap-userns-restrict` profile and
+existing host policy before enabling it on the dedicated execution VM:
+
+```sh
+sudo apt-get install -y apparmor-profiles
+if [ ! -e /etc/apparmor.d/bwrap-userns-restrict ]; then
+  sudo install -m 0644 /usr/share/apparmor/extra-profiles/bwrap-userns-restrict \
+    /etc/apparmor.d/bwrap-userns-restrict
+fi
+sudo apparmor_parser -r /etc/apparmor.d/bwrap-userns-restrict
+```
+
+The packaged profile attaches to the system `/usr/bin/bwrap`, so review its
+effect on any other bubblewrap users on that VM. The installer does not change
+host AppArmor policy automatically. Keep the global namespace restriction and
+AppArmor enabled; repeat the real isolation tests after any policy change.
+CI loads this distro profile on its disposable Ubuntu runner before testing.
+See [Ubuntu's AppArmor documentation](https://documentation.ubuntu.com/security/security-features/privilege-restriction/apparmor/)
+and the [upstream bubblewrap profile](https://gitlab.com/apparmor/apparmor/-/blob/master/profiles/apparmor/profiles/extras/bwrap-userns-restrict).
+
 ## Install
 
 Run from the repository on the Linux execution host:

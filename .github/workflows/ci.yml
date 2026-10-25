@@ -32,7 +32,15 @@ jobs:
       - name: Build trusted runtime
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y bubblewrap libseccomp-dev gcc python3
+          sudo apt-get install -y bubblewrap libseccomp-dev gcc python3 apparmor-profiles
+          # Ubuntu mediates capabilities inside unprivileged user namespaces.
+          # Load the distro's bwrap-specific policy; keep the global restriction.
+          if [ "$(sysctl -n kernel.apparmor_restrict_unprivileged_userns 2>/dev/null || echo 0)" = 1 ]; then
+            if [ ! -f /etc/apparmor.d/bwrap-userns-restrict ]; then
+              sudo install -m 0644 /usr/share/apparmor/extra-profiles/bwrap-userns-restrict /etc/apparmor.d/bwrap-userns-restrict
+            fi
+            sudo apparmor_parser -r /etc/apparmor.d/bwrap-userns-restrict
+          fi
           make build seccomp fmt-check
           sudo install -d -m 0755 /opt/agent-exec
           sudo bash tools/build-rootfs.sh /opt/agent-exec/rootfs
@@ -56,3 +64,6 @@ jobs:
           sudo python3 tools/verify-service.py --token-file /var/lib/agent-exec/auth/client.token --restart-phase before
           sudo systemctl kill --signal=KILL --kill-whom=main agent-exec.service
           sudo python3 tools/verify-service.py --token-file /var/lib/agent-exec/auth/client.token --restart-phase after
+      - name: Diagnose kernel policy failures
+        if: failure()
+        run: sudo journalctl -k -n 100 --no-pager
