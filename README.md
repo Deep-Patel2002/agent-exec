@@ -1,5 +1,7 @@
 # Agent Exec
 
+![Agent Exec project thumbnail](docs/thumbnails/agent-exec.png)
+
 **A local execution service for agent-generated Python and shell workloads, built around Linux-enforced containment.** Agent Exec accepts jobs through an authenticated asynchronous API, admits only bounded requests, runs each job inside a constrained sandbox, and returns a recorded result.
 
 [![CI](https://github.com/Deep-Patel2002/agent-exec/actions/workflows/ci.yml/badge.svg)](https://github.com/Deep-Patel2002/agent-exec/actions/workflows/ci.yml)
