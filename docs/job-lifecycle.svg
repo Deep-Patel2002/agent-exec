@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="650" viewBox="0 0 1440 650" role="img" aria-labelledby="title desc">
+  <title id="title">Agent Exec job lifecycle and isolation boundaries</title>
+  <desc id="desc">A request is authenticated, validated, admitted, persisted, queued, and atomically launched under cgroup v2. Bubblewrap applies namespaces and a read-only runtime plus private temporary mounts. Default-deny seccomp confines execution. Output is capped and the job is cleaned up before the result is persisted and returned. Restart marks queued or running jobs interrupted instead of replaying them.</desc>
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker>
+    <style>
+      .bg{fill:#f8fafc}.title{font:700 30px system-ui,sans-serif;fill:#0f172a}.cap{font:700 17px system-ui,sans-serif;fill:#0f172a}.txt{font:14px system-ui,sans-serif;fill:#334155}.note{font:13px system-ui,sans-serif;fill:#475569}.node{rx:14;stroke-width:2}.line{fill:none;stroke:#64748b;stroke-width:2.5;marker-end:url(#a)}
+    </style>
+  </defs>
+  <rect class="bg" width="1440" height="650" rx="24"/>
+  <text class="title" x="52" y="58">One job, from request to cleanup</text>
+  <text class="note" x="52" y="86">Each stage has explicit bounds; durable transitions happen before work is acknowledged or results are exposed.</text>
+
+  <rect class="node" x="55" y="145" width="236" height="132" fill="#eff6ff" stroke="#60a5fa"/>
+  <text class="cap" x="77" y="181">1 · Request</text><text class="txt" x="77" y="211">Token-authenticated</text><text class="txt" x="77" y="235">Strict bounded JSON</text><text class="note" x="77" y="258">No host paths or env input</text>
+
+  <rect class="node" x="349" y="145" width="236" height="132" fill="#eef2ff" stroke="#818cf8"/>
+  <text class="cap" x="371" y="181">2 · Admission</text><text class="txt" x="371" y="211">Authorize + validate</text><text class="txt" x="371" y="235">Persist record + audit</text><text class="note" x="371" y="258">Queue and input are bounded</text>
+
+  <rect class="node" x="643" y="145" width="236" height="132" fill="#f5f3ff" stroke="#a78bfa"/>
+  <text class="cap" x="665" y="181">3 · Placement</text><text class="txt" x="665" y="211">Create job cgroup</text><text class="txt" x="665" y="235">Write limits, then clone</text><text class="note" x="665" y="258">No post-launch migration path</text>
+
+  <rect class="node" x="937" y="145" width="236" height="132" fill="#ecfdf5" stroke="#34d399"/>
+  <text class="cap" x="959" y="181">4 · Containment</text><text class="txt" x="959" y="211">Bubblewrap namespaces</text><text class="txt" x="959" y="235">Read-only root + inputs</text><text class="note" x="959" y="258">Private /work and /tmp</text>
+
+  <rect class="node" x="1231" y="145" width="154" height="132" fill="#fefce8" stroke="#facc15"/>
+  <text class="cap" x="1251" y="181">5 · Execute</text><text class="txt" x="1251" y="211">Seccomp</text><text class="txt" x="1251" y="235">+ cgroup caps</text><text class="note" x="1251" y="258">no network</text>
+  <path class="line" d="M291 211H344"/><path class="line" d="M585 211H638"/><path class="line" d="M879 211H932"/><path class="line" d="M1173 211H1226"/>
+
+  <rect x="55" y="340" width="790" height="237" rx="20" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text class="cap" x="82" y="379">During execution</text>
+  <rect class="node" x="82" y="410" width="221" height="115" fill="#fff7ed" stroke="#fb923c"/>
+  <text class="cap" x="101" y="445">Resource limits</text><text class="txt" x="101" y="474">CPU · memory · swap</text><text class="txt" x="101" y="499">pids · deadline · output</text>
+  <rect class="node" x="338" y="410" width="221" height="115" fill="#fff7ed" stroke="#fb923c"/>
+  <text class="cap" x="357" y="445">Capture</text><text class="txt" x="357" y="474">Combined output ceiling</text><text class="txt" x="357" y="499">Exit + kernel counters</text>
+  <rect class="node" x="594" y="410" width="221" height="115" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text class="cap" x="613" y="445">Stop + clean</text><text class="txt" x="613" y="474">Cancel / timeout / exit</text><text class="txt" x="613" y="499">Kill descendants + remove</text>
+  <path class="line" d="M303 468H333"/><path class="line" d="M559 468H589"/>
+
+  <rect x="895" y="340" width="490" height="237" rx="20" fill="#eff6ff" stroke="#60a5fa" stroke-width="2"/>
+  <text class="cap" x="922" y="379">Result and recovery</text>
+  <rect class="node" x="922" y="410" width="207" height="115" fill="#f0fdf4" stroke="#34d399"/>
+  <text class="cap" x="942" y="445">Persist result</text><text class="txt" x="942" y="474">State + bounded output</text><text class="note" x="942" y="499">Then expose to owner</text>
+  <rect class="node" x="1156" y="410" width="201" height="115" fill="#fef2f2" stroke="#f87171"/>
+  <text class="cap" x="1176" y="445">On restart</text><text class="txt" x="1176" y="474">queued / running →</text><text class="txt" x="1176" y="499">interrupted · no replay</text>
+  <path class="line" d="M1129 468H1151"/>
+
+  <text class="note" x="55" y="616">Isolation is Linux kernel enforcement. See docs/THREAT_MODEL.md for trusted components and residual risk.</text>
+</svg>
